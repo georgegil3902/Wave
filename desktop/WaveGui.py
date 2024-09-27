@@ -36,13 +36,13 @@ class WaveGui(QWidget):
         control_layout = QHBoxLayout()
 
         # Icons
-        self.play_icon = QIcon("interface/desktop/icons/play.png")
-        self.pause_icon = QIcon("interface/desktop/icons/pause.png")
-        self.prev_icon = QIcon("interface/desktop/icons/prev.png")
-        self.next_icon = QIcon("interface/desktop/icons/next.png")
-        self.volume_high_icon = QIcon("interface/desktop/icons/volume-high.png")
-        self.volume_low_icon = QIcon("interface/desktop/icons/volume-low.png")
-        self.volume_mute_icon = QIcon("interface/desktop/icons/volume-mute.png")
+        self.play_icon = QIcon("shared/icons/play.png")
+        self.pause_icon = QIcon("shared/icons/pause.png")
+        self.prev_icon = QIcon("shared/icons/prev.png")
+        self.next_icon = QIcon("shared/icons/next.png")
+        self.volume_high_icon = QIcon("shared/icons/volume-high.png")
+        self.volume_low_icon = QIcon("shared/icons/volume-low.png")
+        self.volume_mute_icon = QIcon("shared/icons/volume-mute.png")
 
         # Push Button CSS
         self.pushbutton_css = '''
