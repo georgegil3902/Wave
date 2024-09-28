@@ -135,14 +135,24 @@ class WaveGui(QWidget):
 
     # Updated to logging from print
     def toggle_play_pause(self):
+        logging.info("Clicked Play/Pause button")
         if self.media_player.state() == self.media_player.PlayingState:
+            logging.info("Already playing, pausing")
             if self.media_player.pause():
                 self.playpause_button.setIcon(self.play_icon)
                 logging.info("Paused")
         elif self.media_player.state() == self.media_player.PausedState:
+            logging.info("Already paused, resuming")
             if self.media_player.play():
                 self.playpause_button.setIcon(self.pause_icon)
                 logging.info("Playing")
+        elif self.media_player.state() == self.media_player.StoppedState:
+            logging.info("Loading media..., playing")
+            if self.media_player.play():
+                self.playpause_button.setIcon(self.pause_icon)
+                logging.info("Playing")
+        else:
+            logging.error(f"Failed to toggle play/pause... Current State: {self.media_player.state()}")
             
     def prev(self):
         logging.info("Previous button clicked")
