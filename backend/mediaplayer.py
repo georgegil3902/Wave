@@ -18,9 +18,6 @@ logging.basicConfig(
 
 class MediaPlayer:
     def __init__(self):
-        self.app = QCoreApplication.instance()  # Get existing instance or create a new one
-        if self.app is None:
-            self.app = QCoreApplication(sys.argv)  # Initialize the app only if it's not running
         self.audio_output = QAudioOutput(QMediaDevices.defaultAudioOutput())  # Create an audio output instance
         self.player = QMediaPlayer()
         self.player.setAudioOutput(self.audio_output)  # Connect player to the audio output
