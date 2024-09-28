@@ -1,7 +1,7 @@
 import logging
 from PySide6.QtWidgets import (
-    QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout,
-    QSlider, QLabel, QProgressBar, QSpacerItem, QSizePolicy
+    QApplication, QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QMenuBar, QMenu,
+    QSlider, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QFileDialog, QWidget
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
@@ -18,7 +18,7 @@ logging.basicConfig(
 )
 
 
-class WaveGui(QWidget):
+class WaveGui(QMainWindow):
     def __init__(self, media_player=None) -> None:
         super().__init__()
 
@@ -32,8 +32,18 @@ class WaveGui(QWidget):
             background-color: #121212;
         ''')
 
-        # Create main layout
-        main_layout = QVBoxLayout()
+        # Create central widget and set layout
+        central_widget = QWidget(self)
+        main_layout = QVBoxLayout(central_widget)
+        self.setCentralWidget(central_widget)
+
+        # Create menubar
+        menubar = self.menuBar()
+        file_menu = menubar.addMenu("File")
+
+        # Add 'Open' action under 'File' menu
+        open_action = file_menu.addAction("Open")
+        open_action.triggered.connect(self.open_file)
 
         # Media metadata (song title, artist, etc.)
         self.song_label = QLabel("Song Title - Artist Name")
@@ -73,55 +83,51 @@ class WaveGui(QWidget):
             }
         '''
 
-        # Control Buttons
+        # Previous Button
         self.prev_button = QPushButton()
         self.prev_button.setIcon(self.prev_icon)
         self.prev_button.setFixedSize(40, 40)
         self.prev_button.setIconSize(QSize(24, 24))
         self.prev_button.setStyleSheet(self.pushbutton_css)
+        control_layout.addWidget(self.prev_button)
 
+        # Play/Pause Button
         self.playpause_button = QPushButton()
         self.playpause_button.setIcon(self.play_icon)
         self.playpause_button.setFixedSize(40, 40)
         self.playpause_button.setIconSize(QSize(24, 24))
         self.playpause_button.setStyleSheet(self.pushbutton_css)
+        control_layout.addWidget(self.playpause_button)
 
+        # Next Button
         self.next_button = QPushButton()
         self.next_button.setIcon(self.next_icon)
         self.next_button.setFixedSize(40, 40)
         self.next_button.setIconSize(QSize(24, 24))
         self.next_button.setStyleSheet(self.pushbutton_css)
-
-        # Add control buttons to layout
-        control_layout.addWidget(self.prev_button)
-        control_layout.addWidget(self.playpause_button)
         control_layout.addWidget(self.next_button)
 
-        # Add a spacer to push the volume controls to the right
+        # Spacer
         spacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
         control_layout.addItem(spacer)
 
-        # Volume control
+        # Volume Button
         self.volume_button = QPushButton()
         self.volume_button.setIcon(self.volume_low_icon)
         self.volume_button.setFixedSize(40, 40)
         self.volume_button.setIconSize(QSize(24, 24))
         self.volume_button.setStyleSheet(self.pushbutton_css)
+        control_layout.addWidget(self.volume_button)
 
+        # Volume Slider
         self.volume_slider = QSlider(Qt.Horizontal)
         self.volume_slider.setRange(0, 100)
         self.volume_slider.setValue(50)
-        self.volume_slider.setFixedWidth(150)  # Adjust width as needed
-
-        # Add volume controls to the control layout
-        control_layout.addWidget(self.volume_button)
+        self.volume_slider.setFixedWidth(150)
         control_layout.addWidget(self.volume_slider)
 
         # Add control layout to main layout
         main_layout.addLayout(control_layout)
-
-        # Set the main layout
-        self.setLayout(main_layout)
 
         # Button and slider connections
         self.playpause_button.clicked.connect(self.toggle_play_pause)
@@ -132,6 +138,16 @@ class WaveGui(QWidget):
 
         # Variables to handle volume state
         self.previous_volume = self.volume_slider.value()
+
+    # Open file dialog to load media
+    def open_file(self):
+        file_name, _ = QFileDialog.getOpenFileName(self, "Open Audio File", "", "Audio Files (*.mp3 *.wav *.ogg)")
+        if file_name:
+            logging.info(f"Selected file: {file_name}")
+            self.song_label.setText(file_name)  # Update the label with the file name
+            if self.media_player:
+                self.media_player.load_media(file_name)
+                logging.info(f"Loaded media: {file_name}")
 
     # Updated to logging from print
     def toggle_play_pause(self):
@@ -153,7 +169,7 @@ class WaveGui(QWidget):
                 logging.info("Playing")
         else:
             logging.error(f"Failed to toggle play/pause... Current State: {self.media_player.state()}")
-            
+
     def prev(self):
         logging.info("Previous button clicked")
 
@@ -161,9 +177,7 @@ class WaveGui(QWidget):
         logging.info("Next button clicked")
 
     def change_volume(self, value):
-        # Call the setVolume function and check if it succeeded
         if self.media_player.setVolume(value):  # Assuming setVolume returns True if successful
-            # Update the volume icon based on the volume level
             if value == 0:
                 self.volume_button.setIcon(self.volume_mute_icon)
             elif value <= 50:
@@ -177,12 +191,10 @@ class WaveGui(QWidget):
     def toggle_mute(self):
         current_volume = self.media_player.getVolume()  # Assuming getVolume retrieves the current volume
         if current_volume == 0:
-            # If the volume is already muted, restore the previous volume
             if self.media_player.setVolume(self.previous_volume):  # Restore previous volume
                 self.volume_slider.setValue(self.previous_volume)
                 logging.info(f"Volume restored to {self.previous_volume}")
         else:
-            # Save current volume and mute
             self.previous_volume = current_volume   # Save the current volume
             if self.media_player.setVolume(0):      # Mute
                 self.volume_slider.setValue(0)
