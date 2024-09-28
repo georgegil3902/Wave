@@ -35,21 +35,26 @@ class MediaPlayer:
     def play(self):
         if self.player.mediaStatus() == QMediaPlayer.NoMedia:
             logging.warning("Attempted to play but no media is loaded")
+            return False
         else:
             self.player.play()
             logging.info("Playing media")
             logging.info(f"Current volume: {self.audio_output.volume() * 100}%")
+            return True
 
     def pause(self):
         if self.player.playbackState() == QMediaPlayer.PlayingState:
             self.player.pause()
             logging.info("Pausing media")
+            return True
         else:
             logging.warning("Attempted to pause but media is not playing")
+            return False
 
     def stop(self):
         self.player.stop()
         logging.info("Stopping media")
+        return True
 
     def setVolume(self, volume):
         # Volume is set between 0.0 (min) and 1.0 (max)
