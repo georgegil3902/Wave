@@ -1,3 +1,4 @@
+import logging
 from PySide6.QtWidgets import (
     QApplication, QWidget, QPushButton, QVBoxLayout, QHBoxLayout,
     QSlider, QLabel, QProgressBar, QSpacerItem, QSizePolicy
@@ -6,10 +7,23 @@ from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
 import sys
 
+# Setup logging configuration
+logging.basicConfig(
+    level=logging.DEBUG, 
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("desktop/wave_media_player.log"),  # Log to external file
+        logging.StreamHandler()  # Optionally, keep logging to the console
+    ]
+)
+
 
 class WaveGui(QWidget):
-    def __init__(self) -> None:
+    def __init__(self, media_player=None) -> None:
         super().__init__()
+
+        # Setup media player
+        self.media_player = media_player
 
         # Window Setup
         self.setWindowTitle("Wave Media Player")
@@ -117,27 +131,28 @@ class WaveGui(QWidget):
         self.volume_button.clicked.connect(self.toggle_mute)
 
         # Variables to handle volume state
-        self.is_muted = False
         self.previous_volume = self.volume_slider.value()
 
-    # Dummy play/pause functions for now
+    # Updated to logging from print
     def toggle_play_pause(self):
-        if self.playpause_button.icon().cacheKey() == self.play_icon.cacheKey():
-            self.playpause_button.setIcon(self.pause_icon)
-            print("Paused")
-        else:
-            self.playpause_button.setIcon(self.play_icon)
-            print("Playing")
+        if self.media_player.state() == self.media_player.PlayingState:
+            if self.media_player.pause():
+                self.playpause_button.setIcon(self.play_icon)
+                logging.info("Paused")
+        elif self.media_player.state() == self.media_player.PausedState:
+            if self.media_player.play():
+                self.playpause_button.setIcon(self.pause_icon)
+                logging.info("Playing")
             
     def prev(self):
-        print("Previous button clicked")
+        logging.info("Previous button clicked")
 
     def next(self):
-        print("Next button clicked")
+        logging.info("Next button clicked")
 
     def change_volume(self, value):
-        if not self.is_muted:
-            print(f"Volume set to {value}")
+        # Call the setVolume function and check if it succeeded
+        if self.media_player.setVolume(value):  # Assuming setVolume returns True if successful
             # Update the volume icon based on the volume level
             if value == 0:
                 self.volume_button.setIcon(self.volume_mute_icon)
@@ -145,37 +160,30 @@ class WaveGui(QWidget):
                 self.volume_button.setIcon(self.volume_low_icon)
             else:
                 self.volume_button.setIcon(self.volume_high_icon)
+            logging.info(f"Volume set to {value}")
         else:
-            self.volume_button.setIcon(self.volume_mute_icon)
-            print("Volume is muted")
-
-        # Update the previous volume if not muted
-        if not self.is_muted:
-            self.previous_volume = value
+            logging.warning(f"Failed to set volume to {value}")
 
     def toggle_mute(self):
-        if self.is_muted:
-            # Unmute and restore previous volume
-            self.is_muted = False
-            self.volume_slider.setValue(self.previous_volume)
-            print(f"Unmuted, volume restored to {self.previous_volume}")
+        current_volume = self.media_player.getVolume()  # Assuming getVolume retrieves the current volume
+        if current_volume == 0:
+            # If the volume is already muted, restore the previous volume
+            if self.media_player.setVolume(self.previous_volume):  # Restore previous volume
+                self.volume_slider.setValue(self.previous_volume)
+                logging.info(f"Volume restored to {self.previous_volume}")
         else:
-            # Mute and save current volume
-            self.is_muted = True
-            self.previous_volume = self.volume_slider.value()
-            self.volume_slider.setValue(0)
-            print("Muted")
+            # Save current volume and mute
+            self.previous_volume = current_volume   # Save the current volume
+            if self.media_player.setVolume(0):      # Mute
+                self.volume_slider.setValue(0)
+                logging.info("Muted")
 
-        # Update the volume icon
-        self.change_volume(self.volume_slider.value())
-
-
-def runui():
+def initiate_ui(media_player=None) -> None:
     app = QApplication(sys.argv)
-    window = WaveGui()
+    window = WaveGui(media_player)
     window.show()
     sys.exit(app.exec())
 
 
 if __name__ == "__main__":
-    runui()
+    initiate_ui()
