@@ -42,7 +42,6 @@ class MediaPlayer:
             self.player.play()
             logging.info("Playing media")
             logging.info(f"Current volume: {self.audio_output.volume() * 100}%")
-            self.app.exec()  # Start event loop to allow media to play
 
     def pause(self):
         if self.player.playbackState() == QMediaPlayer.PlayingState:
@@ -55,10 +54,29 @@ class MediaPlayer:
         self.player.stop()
         logging.info("Stopping media")
 
-    def set_volume(self, volume):
+    def setVolume(self, volume):
         # Volume is set between 0.0 (min) and 1.0 (max)
         self.audio_output.setVolume(volume / 100.0)
         logging.info(f"Volume set to: {volume}%")
+        return True
+
+    def getVolume(self):
+        return int(self.audio_output.volume() * 100)
+    
+    def state(self):
+        return self.player.playbackState()
+    
+    @property
+    def PlayingState(self):
+        return QMediaPlayer.PlayingState
+    
+    @property
+    def PausedState(self):
+        return QMediaPlayer.PausedState
+    
+    @property
+    def StoppedState(self):
+        return QMediaPlayer.StoppedState
 
     def on_media_status_changed(self, status):
         logging.info(f"Media status changed: {status}")
@@ -73,6 +91,7 @@ class MediaPlayer:
     def quit(self):   
         logging.info("Quitting the application")
         self.app.quit()  # Gracefully quit the app and stop event loop
+
 
 if __name__ == '__main__':
 
