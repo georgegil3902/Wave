@@ -8,7 +8,7 @@ from PySide6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QMenuBar, QMenu,
     QSlider, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QFileDialog, QWidget
 )
-from PySide6.QtCore import Qt, QSize
+from PySide6.QtCore import Qt, QSize, QTimer
 from PySide6.QtGui import QIcon
 
 
@@ -59,7 +59,13 @@ class WaveGui(QMainWindow):
         # Progress bar for tracking media progress
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet('background-color: #000')
+        self.progress_bar.setRange(0, 100)  # Placeholder; will update when media loads
         main_layout.addWidget(self.progress_bar)
+
+        # Timer to update progress bar
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_progress_bar)
+        self.timer.start(1000)  # Update every second
 
         # Layout for control buttons (Play, Pause, Stop)
         control_layout = QHBoxLayout()
@@ -163,6 +169,18 @@ class WaveGui(QMainWindow):
             if self.media_player:
                 self.media_player.load_media(file_name)
                 logging.info(f"Loaded media: {file_name}")
+                self.update_progress_range()  # Update the progress bar range
+
+    # Update progress bar range (media duration)
+    def update_progress_range(self):
+        duration = self.media_player.get_duration()
+        if duration > 0:
+            self.progress_bar.setRange(0, duration)
+
+    # Update progress bar position
+    def update_progress_bar(self):
+        position = self.media_player.get_position()
+        self.progress_bar.setValue(position)
 
     # Updated to logging from print
     def toggle_play_pause(self):
