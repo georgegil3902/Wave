@@ -28,6 +28,13 @@ class MediaPlayer:
         self.player.mediaStatusChanged.connect(self.on_media_status_changed)
         self.player.errorOccurred.connect(self.on_media_error)
 
+        # Connect signals to track media duration and position for progress tracking
+        self.player.durationChanged.connect(self.on_duration_changed)
+        self.player.positionChanged.connect(self.on_position_changed)
+
+        self._duration = 0
+        self._position = 0
+
     def load_media(self, media_path):
         self.player.setSource(QUrl.fromLocalFile(media_path))
         logging.info(f"Media loaded: {media_path}")
@@ -68,6 +75,7 @@ class MediaPlayer:
     def state(self):
         return self.player.playbackState()
     
+    # Properties for the media states
     @property
     def PlayingState(self):
         return QMediaPlayer.PlayingState
@@ -79,6 +87,26 @@ class MediaPlayer:
     @property
     def StoppedState(self):
         return QMediaPlayer.StoppedState
+
+    # Handle media duration change (set when media is loaded)
+    def on_duration_changed(self, duration):
+        self._duration = duration
+        logging.info(f"Media duration set to: {duration} ms")
+
+    # Handle media position change (triggered during playback)
+    def on_position_changed(self, position):
+        self._position = position
+        logging.info(f"Media position updated: {position} ms")
+
+    # Return the duration of the media
+    @property
+    def get_duration(self):
+        return self._duration
+
+    # Return the current position of the media
+    @property
+    def get_position(self):
+        return self._position
 
     def on_media_status_changed(self, status):
         logging.info(f"Media status changed: {status}")
