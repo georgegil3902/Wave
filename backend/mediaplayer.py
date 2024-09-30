@@ -1,9 +1,7 @@
 import logging
-import signal
 import sys
-import time
 from PySide6.QtMultimedia import QMediaPlayer, QAudioOutput
-from PySide6.QtCore import QUrl, QCoreApplication, QTimer
+from PySide6.QtCore import QUrl
 from PySide6.QtMultimedia import QMediaDevices
 
 # Setup logging configuration to write to an external file
@@ -24,11 +22,9 @@ class MediaPlayer:
         self.audio_output.setVolume(0.5)  # Set volume (0.0 to 1.0)
         logging.info("Media player initialized with default volume set to 50%")
 
-        # Connect signals to track media status and errors
+        # Connect signals to track media status, duration, position, and errors
         self.player.mediaStatusChanged.connect(self.on_media_status_changed)
         self.player.errorOccurred.connect(self.on_media_error)
-
-        # Connect signals to track media duration and position for progress tracking
         self.player.durationChanged.connect(self.on_duration_changed)
         self.player.positionChanged.connect(self.on_position_changed)
 
@@ -64,7 +60,6 @@ class MediaPlayer:
         return True
 
     def setVolume(self, volume):
-        # Volume is set between 0.0 (min) and 1.0 (max)
         self.audio_output.setVolume(volume / 100.0)
         logging.info(f"Volume set to: {volume}%")
         return True
@@ -99,12 +94,10 @@ class MediaPlayer:
         logging.info(f"Media position updated: {position} ms")
 
     # Return the duration of the media
-    @property
     def get_duration(self):
         return self._duration
 
     # Return the current position of the media
-    @property
     def get_position(self):
         return self._position
 
@@ -112,19 +105,23 @@ class MediaPlayer:
         logging.info(f"Media status changed: {status}")
         if status == QMediaPlayer.EndOfMedia:
             logging.info("Media playback finished")
-            self.app.quit()  # Exit event loop when media ends
+            self.stop()
 
     def on_media_error(self, error):
         logging.error(f"Media error occurred: {error}")
-        self.app.quit()  # Exit event loop on error
+        self.stop()
 
-    def quit(self):   
+    def quit(self):
         logging.info("Quitting the application")
-        self.app.quit()  # Gracefully quit the app and stop event loop
-
+        self.stop()
 
 if __name__ == '__main__':
-
     player = MediaPlayer()
     player.load_media('backend/song.mp3')
     player.play()
+
+    # Example to print media position and duration for 5 seconds
+    import time
+    for _ in range(5):
+        print(f"Position: {player.get_position()} / {player.get_duration()} ms")
+        time.sleep(1)
