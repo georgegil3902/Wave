@@ -1,11 +1,16 @@
+# Built in modules
 import logging
+import sys
+
+# Externally installed modules
+# PySide modules
 from PySide6.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QVBoxLayout, QHBoxLayout, QMenuBar, QMenu,
     QSlider, QLabel, QProgressBar, QSpacerItem, QSizePolicy, QFileDialog, QWidget
 )
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
-import sys
+
 
 # Setup logging configuration
 logging.basicConfig(
@@ -31,7 +36,7 @@ class WaveGui(QMainWindow):
         self.setStyleSheet('''
             background-color: #121212;
         ''')
-
+        
         # Create central widget and set layout
         central_widget = QWidget(self)
         main_layout = QVBoxLayout(central_widget)
@@ -68,27 +73,37 @@ class WaveGui(QMainWindow):
         self.volume_low_icon = QIcon("shared/icons/volume-low.png")
         self.volume_mute_icon = QIcon("shared/icons/volume-mute.png")
 
-        # Push Button CSS
-        self.pushbutton_css = '''
-            QPushButton {
-                background-color: #1DE9B6;
-                border: none;
-                border-radius: 25px;
-            }
-            QPushButton:hover {
-                background-color: #14CBA8;
-            }
-            QPushButton:pressed {
-                background-color: #0FB89A;
-            }
-        '''
+        self.pushbutton_qss = ("""
+        QPushButton {
+            background-color: #1DE9B6;        /* Main background color */
+            color: white;                     /* Text color */
+            border: none;                     /* Remove default border */
+            padding: 10px 20px;               /* Add padding */
+            border-radius: 15px;              /* Rounded corners */
+            font-size: 16px;                  /* Adjust font size */
+            font-weight: bold;
+        }
+
+        QPushButton:hover {
+            background-color: #14CBA8;        /* Darker background on hover */
+        }
+
+        QPushButton:pressed {
+            background-color: #0FB89A;        /* Even darker background on press */
+        }
+
+        QPushButton:focus {
+            outline: none;                    /* Remove focus border */
+        }
+
+        """)
 
         # Previous Button
         self.prev_button = QPushButton()
         self.prev_button.setIcon(self.prev_icon)
         self.prev_button.setFixedSize(40, 40)
         self.prev_button.setIconSize(QSize(24, 24))
-        self.prev_button.setStyleSheet(self.pushbutton_css)
+        self.prev_button.setStyleSheet(self.pushbutton_qss)
         control_layout.addWidget(self.prev_button)
 
         # Play/Pause Button
@@ -96,7 +111,7 @@ class WaveGui(QMainWindow):
         self.playpause_button.setIcon(self.play_icon)
         self.playpause_button.setFixedSize(40, 40)
         self.playpause_button.setIconSize(QSize(24, 24))
-        self.playpause_button.setStyleSheet(self.pushbutton_css)
+        self.playpause_button.setStyleSheet(self.pushbutton_qss)
         control_layout.addWidget(self.playpause_button)
 
         # Next Button
@@ -104,7 +119,7 @@ class WaveGui(QMainWindow):
         self.next_button.setIcon(self.next_icon)
         self.next_button.setFixedSize(40, 40)
         self.next_button.setIconSize(QSize(24, 24))
-        self.next_button.setStyleSheet(self.pushbutton_css)
+        self.next_button.setStyleSheet(self.pushbutton_qss)
         control_layout.addWidget(self.next_button)
 
         # Spacer
@@ -116,7 +131,7 @@ class WaveGui(QMainWindow):
         self.volume_button.setIcon(self.volume_low_icon)
         self.volume_button.setFixedSize(40, 40)
         self.volume_button.setIconSize(QSize(24, 24))
-        self.volume_button.setStyleSheet(self.pushbutton_css)
+        self.volume_button.setStyleSheet(self.pushbutton_qss)
         control_layout.addWidget(self.volume_button)
 
         # Volume Slider
