@@ -59,7 +59,7 @@ class WaveGui(QMainWindow):
         # Progress bar for tracking media progress
         self.progress_bar = QProgressBar()
         self.progress_bar.setStyleSheet('background-color: #000')
-        self.progress_bar.setRange(0, 100)  # Placeholder; will update when media loads
+        self.progress_bar.setRange(0, self.media_player.get_duration())  # Placeholder; will update when media loads
         main_layout.addWidget(self.progress_bar)
 
         # Timer to update progress bar
